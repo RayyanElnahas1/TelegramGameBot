@@ -539,9 +539,7 @@ def run_dummy():
 
 
 def main():
-
-threading.Thread(target=run_dummy, daemon=True).start()
-    
+    threading.Thread(target=run_dummy, daemon=True).start()
     create_database()
     init_products_db()
 
