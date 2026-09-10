@@ -525,7 +525,7 @@ app_dummy = Flask('')
 
 @app_dummy.route('/')
 def home():
-    return "Bot is running!"
+    return "Bot is active!"
 
 def run_dummy():
     port = int(os.environ.get("PORT", 10000))
@@ -539,6 +539,9 @@ def run_dummy():
 
 
 def main():
+
+threading.Thread(target=run_dummy, daemon=True).start()
+    
     create_database()
     init_products_db()
 
