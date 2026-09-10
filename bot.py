@@ -2,6 +2,8 @@ import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
+import threading
+from flask import Flask
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -517,6 +519,25 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("❌ تم إلغاء الطلب.\n\nاكتب /start لو عايز تبدأ طلب جديد.")
     return ConversationHandler.END
 
+
+
+app_dummy = Flask('')
+
+@app_dummy.route('/')
+def home():
+    return "Bot is running!"
+
+def run_dummy():
+    port = int(os.environ.get("PORT", 10000))
+    app_dummy.run(host='0.0.0.0', port=port)
+
+# في دالة main() أضف السطر ده قبل application.run_polling():
+# threading.Thread(target=run_dummy, daemon=True).start()
+
+
+
+
+
 def main():
     create_database()
     init_products_db()
@@ -550,3 +571,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
