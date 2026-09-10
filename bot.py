@@ -200,6 +200,18 @@ def add_profit(price):
 # الواجهات والتعامل مع التليجرام
 # =========================================================
 
+async def handle_button(update, context):
+    query = update.callback_query
+    try:
+        await query.edit_message_text(text="NTEXT", reply_markup=KEYBOARD)
+    except BadRequest as e:
+        if "Message is not modified" in str(e):
+            pass  # تجاهل الخطأ لو الرسالة لم تتغير
+        else:
+            raise e
+
+
+
 def main_menu():
     products = get_products()
     keyboard = []
@@ -216,19 +228,6 @@ def main_menu():
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    try:
-    await query.edit_message_text(text="NTEXT", reply_markup=KEYBOARD)
-    except BadRequest as e:
-    if "Message is not modified" in str(e):
-        pass  # تجاهل الخطأ إذا كان النص هو نفسه
-    else:
-        raise e
-
-
-
-
-
-    
     context.user_data.clear()
     user = update.effective_user
 
