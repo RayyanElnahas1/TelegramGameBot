@@ -1,5 +1,6 @@
 import os
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from datetime import datetime
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -14,16 +15,17 @@ from telegram.ext import (
 )
 
 # =========================================================
-# إعدادات البوت - Environment Variables & DB Path
+# إعدادات البوت - Environment Variables
 # =========================================================
 
-BOT_TOKEN = "8847079099:AAH_2MNnmSCwf0Fapmc2bHisjZNE496Lp7M"
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not BOT_TOKEN:
     raise RuntimeError("BOT_TOKEN environment variable is missing")
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_NAME = os.path.join(BASE_DIR, "orders.db")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL environment variable is missing")
 
 PAYMENT_METHOD = "E& Money"
 WALLET_NUMBER = "01149818351"
@@ -34,134 +36,135 @@ WAITING_PLAYER_ID = 2
 WAITING_RECEIPT = 3
 
 # =========================================================
-# قاعدة البيانات
+# قاعدة البيانات (PostgreSQL / Supabase)
 # =========================================================
 
 def get_db():
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
     return conn
 
 def init_products_db():
     conn = get_db()
+    cursor = conn.cursor()
 
-    conn.execute("""
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS products (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            product_type TEXT NOT NULL DEFAULT 'game',
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            product_type VARCHAR(50) NOT NULL DEFAULT 'game',
             description TEXT DEFAULT '',
             image TEXT DEFAULT '',
-            active INTEGER NOT NULL DEFAULT 1,
+            active INT NOT NULL DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
-    conn.execute("""
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS packages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            product_id INTEGER NOT NULL,
-            name TEXT NOT NULL,
+            id SERIAL PRIMARY KEY,
+            product_id INT NOT NULL,
+            name VARCHAR(255) NOT NULL,
             price REAL NOT NULL DEFAULT 0,
-            active INTEGER NOT NULL DEFAULT 1,
+            active INT NOT NULL DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
         )
     """)
 
-    # ضمان تفعيل جميع المنتجات والباقات الموجودة
-    conn.execute("UPDATE products SET active = 1 WHERE active = 0")
-    conn.execute("UPDATE packages SET active = 1 WHERE active = 0")
+    cursor.execute("UPDATE products SET active = 1 WHERE active = 0")
+    cursor.execute("UPDATE packages SET active = 1 WHERE active = 0")
 
     conn.commit()
+    cursor.close()
     conn.close()
-
-def get_products():
-    conn = get_db()
-    products = conn.execute("""
-        SELECT *
-        FROM products
-        WHERE active = 1
-        ORDER BY id ASC
-    """).fetchall()
-    conn.close()
-    return products
-
-def get_product(product_id):
-    conn = get_db()
-    product = conn.execute("""
-        SELECT *
-        FROM products
-        WHERE id = ? AND active = 1
-    """, (product_id,)).fetchone()
-    conn.close()
-    return product
-
-def get_packages(product_id):
-    conn = get_db()
-    packages = conn.execute("""
-        SELECT *
-        FROM packages
-        WHERE product_id = ? AND active = 1
-        ORDER BY id ASC
-    """, (product_id,)).fetchall()
-    conn.close()
-    return packages
-
-def get_package(package_id):
-    conn = get_db()
-    package = conn.execute("""
-        SELECT packages.*, products.name AS product_name
-        FROM packages
-        JOIN products ON products.id = packages.product_id
-        WHERE packages.id = ? AND packages.active = 1 AND products.active = 1
-    """, (package_id,)).fetchone()
-    conn.close()
-    return package
 
 def create_database():
     conn = get_db()
+    cursor = conn.cursor()
 
-    conn.execute("""
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS orders (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            telegram_id INTEGER NOT NULL,
-            username TEXT,
-            customer_name TEXT NOT NULL,
-            game TEXT NOT NULL,
-            package TEXT NOT NULL,
+            id SERIAL PRIMARY KEY,
+            telegram_id BIGINT NOT NULL,
+            username VARCHAR(255),
+            customer_name VARCHAR(255) NOT NULL,
+            game VARCHAR(255) NOT NULL,
+            package VARCHAR(255) NOT NULL,
             original_price REAL NOT NULL,
             final_price REAL NOT NULL,
-            player_id TEXT NOT NULL,
-            receipt_file_id TEXT,
-            status TEXT NOT NULL DEFAULT 'pending',
-            created_at TEXT NOT NULL
+            player_id VARCHAR(255) NOT NULL,
+            receipt_file_id VARCHAR(255),
+            status VARCHAR(50) NOT NULL DEFAULT 'pending',
+            created_at VARCHAR(255) NOT NULL
         )
     """)
 
-    conn.execute("""
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            telegram_id INTEGER NOT NULL DEFAULT 0,
-            order_id INTEGER,
-            sender TEXT NOT NULL,
-            message_type TEXT NOT NULL DEFAULT 'text',
+            id SERIAL PRIMARY KEY,
+            telegram_id BIGINT NOT NULL DEFAULT 0,
+            order_id INT,
+            sender VARCHAR(50) NOT NULL,
+            message_type VARCHAR(50) NOT NULL DEFAULT 'text',
             message_text TEXT,
             text TEXT,
-            telegram_message_id INTEGER,
+            telegram_message_id BIGINT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
 
     conn.commit()
+    cursor.close()
     conn.close()
+
+def get_products():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM products WHERE active = 1 ORDER BY id ASC")
+    products = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return products
+
+def get_product(product_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM products WHERE id = %s AND active = 1", (product_id,))
+    product = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return product
+
+def get_packages(product_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM packages WHERE product_id = %s AND active = 1 ORDER BY id ASC", (product_id,))
+    packages = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return packages
+
+def get_package(package_id):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT packages.*, products.name AS product_name
+        FROM packages
+        JOIN products ON products.id = packages.product_id
+        WHERE packages.id = %s AND packages.active = 1 AND products.active = 1
+    """, (package_id,))
+    package = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return package
 
 def save_message(telegram_id, sender, message_type, message_text=None, telegram_message_id=None, order_id=None):
     conn = get_db()
-    conn.execute(
+    cursor = conn.cursor()
+    cursor.execute(
         """
         INSERT INTO messages (telegram_id, order_id, sender, message_type, message_text, text, telegram_message_id, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """,
         (
             telegram_id,
@@ -175,6 +178,7 @@ def save_message(telegram_id, sender, message_type, message_text=None, telegram_
         )
     )
     conn.commit()
+    cursor.close()
     conn.close()
 
 def add_profit(price):
@@ -188,7 +192,7 @@ def add_profit(price):
     return price + profit
 
 # =========================================================
-# الواجهات
+# الواجهات والتعامل مع التليجرام
 # =========================================================
 
 def main_menu():
@@ -407,15 +411,18 @@ async def receive_receipt(update: Update, context: ContextTypes.DEFAULT_TYPE):
     created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     conn = get_db()
-    cursor = conn.execute(
+    cursor = conn.cursor()
+    cursor.execute(
         """
         INSERT INTO orders (telegram_id, username, customer_name, game, package, original_price, final_price, player_id, receipt_file_id, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        RETURNING id
         """,
         (telegram_id, username, customer_name, game_name, package, original_price, final_price, player_id, photo.file_id, "pending", created_at)
     )
-    order_id = cursor.lastrowid
+    order_id = cursor.fetchone()["id"]
     conn.commit()
+    cursor.close()
     conn.close()
 
     save_message(
@@ -447,10 +454,13 @@ async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     telegram_id = query.from_user.id
     conn = get_db()
-    orders = conn.execute(
-        "SELECT * FROM orders WHERE telegram_id = ? ORDER BY id DESC",
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT * FROM orders WHERE telegram_id = %s ORDER BY id DESC",
         (telegram_id,)
-    ).fetchall()
+    )
+    orders = cursor.fetchall()
+    cursor.close()
     conn.close()
 
     if not orders:
