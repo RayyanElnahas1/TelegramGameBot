@@ -4,6 +4,7 @@ from psycopg2.extras import RealDictCursor
 from datetime import datetime
 import threading
 from flask import Flask
+from telegram.error import BadRequest
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -39,7 +40,20 @@ WAITING_RECEIPT = 3
 
 # =========================================================
 # قاعدة البيانات (PostgreSQL / Supabase)
-# =========================================================
+# ========================================================
+
+try:
+    await query.edit_message_text(text="NTEXT", reply_markup=KEYBOARD)
+except BadRequest as e:
+    if "Message is not modified" in str(e):
+        pass  # تجاهل الخطأ إذا كان النص هو نفسه
+    else:
+        raise e
+
+
+
+
+
 
 def get_db():
     conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
