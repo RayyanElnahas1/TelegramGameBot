@@ -1,59 +1,66 @@
 import os
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import requests
 from flask import Flask, render_template, request, redirect, url_for, send_file
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_NAME = os.path.join(BASE_DIR, "orders.db")
-BOT_TOKEN = "8847079099:AAH_2MNnmSCwf0Fapmc2bHisjZNE496Lp7M"
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 def get_db():
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
     return conn
 
 def init_products_db():
+    if not DATABASE_URL:
+        return
     conn = get_db()
-    conn.execute("""
+    cursor = conn.cursor()
+    cursor.execute("""
     CREATE TABLE IF NOT EXISTS products (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        product_type TEXT NOT NULL DEFAULT 'game',
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        product_type VARCHAR(50) NOT NULL DEFAULT 'game',
         description TEXT DEFAULT '',
         image TEXT DEFAULT '',
-        active INTEGER NOT NULL DEFAULT 1,
+        active INT NOT NULL DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
-    conn.execute("""
+    cursor.execute("""
     CREATE TABLE IF NOT EXISTS packages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        product_id INTEGER NOT NULL,
-        name TEXT NOT NULL,
+        id SERIAL PRIMARY KEY,
+        product_id INT NOT NULL,
+        name VARCHAR(255) NOT NULL,
         price REAL NOT NULL DEFAULT 0,
-        active INTEGER NOT NULL DEFAULT 1,
+        active INT NOT NULL DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
     )
     """)
-    conn.execute("""
+    cursor.execute("""
     CREATE TABLE IF NOT EXISTS messages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        telegram_id INTEGER NOT NULL DEFAULT 0,
-        order_id INTEGER,
-        sender TEXT NOT NULL,
-        message_type TEXT NOT NULL DEFAULT 'text',
+        id SERIAL PRIMARY KEY,
+        telegram_id BIGINT NOT NULL DEFAULT 0,
+        order_id INT,
+        sender VARCHAR(50) NOT NULL,
+        message_type VARCHAR(50) NOT NULL DEFAULT 'text',
         message_text TEXT,
         text TEXT,
-        telegram_message_id INTEGER,
+        telegram_message_id BIGINT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
     conn.commit()
+    cursor.close()
     conn.close()
 
 def send_telegram_notification(chat_id, text):
+    if not BOT_TOKEN:
+        print("BOT_TOKEN is missing. Notification not sent.")
+        return
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {"chat_id": chat_id, "text": text}
     try:
@@ -63,10 +70,13 @@ def send_telegram_notification(chat_id, text):
 
 def get_orders():
     conn = get_db()
+    cursor = conn.cursor()
     try:
-        orders = conn.execute("SELECT * FROM orders ORDER BY id DESC").fetchall()
+        cursor.execute("SELECT * FROM orders ORDER BY id DESC")
+        orders = cursor.fetchall()
         return orders
     finally:
+        cursor.close()
         conn.close()
 
 @app.route("/")
@@ -82,17 +92,22 @@ def orders():
 @app.route('/order/<int:order_id>')
 def order_details(order_id):
     conn = get_db()
-    order = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM orders WHERE id = %s", (order_id,))
+    order = cursor.fetchone()
     if order is None:
+        cursor.close()
         conn.close()
         return "الطلب غير موجود", 404
 
-    messages = conn.execute("""
+    cursor.execute("""
         SELECT * FROM messages 
-        WHERE order_id = ? OR (telegram_id = ? AND telegram_id != 0)
+        WHERE order_id = %s OR (telegram_id = %s AND telegram_id != 0)
         ORDER BY id ASC
-    """, (order_id, order['telegram_id'])).fetchall()
+    """, (order_id, order['telegram_id']))
+    messages = cursor.fetchall()
     
+    cursor.close()
     conn.close()
     return render_template('order_details.html', order=order, messages=messages)
 
@@ -100,9 +115,12 @@ def order_details(order_id):
 def update_order_status(order_id):
     new_status = request.form.get('status')
     conn = get_db()
-    order = conn.execute("SELECT telegram_id FROM orders WHERE id = ?", (order_id,)).fetchone()
-    conn.execute("UPDATE orders SET status = ? WHERE id = ?", (new_status, order_id))
+    cursor = conn.cursor()
+    cursor.execute("SELECT telegram_id FROM orders WHERE id = %s", (order_id,))
+    order = cursor.fetchone()
+    cursor.execute("UPDATE orders SET status = %s WHERE id = %s", (new_status, order_id))
     conn.commit()
+    cursor.close()
     conn.close()
 
     if order and order['telegram_id']:
@@ -119,7 +137,10 @@ def update_order_status(order_id):
 @app.route('/order/<int:order_id>/receipt')
 def order_receipt(order_id):
     conn = get_db()
-    order = conn.execute('SELECT * FROM orders WHERE id = ?', (order_id,)).fetchone()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM orders WHERE id = %s', (order_id,))
+    order = cursor.fetchone()
+    cursor.close()
     conn.close()
     
     if not order:
@@ -136,11 +157,9 @@ def order_receipt(order_id):
 
     if os.path.exists(str(receipt_val)):
         return send_file(str(receipt_val))
-    
-    for folder in ['receipts', 'static/receipts', 'uploads']:
-        file_path = os.path.join(folder, os.path.basename(str(receipt_val)))
-        if os.path.exists(file_path):
-            return send_file(file_path)
+
+    if not BOT_TOKEN:
+        return "تعذر تحميل الإيصال: BOT_TOKEN مفقود", 500
 
     try:
         file_info = requests.get(f"https://api.telegram.org/bot{BOT_TOKEN}/getFile?file_id={receipt_val}").json()
@@ -166,29 +185,35 @@ def send_order_message(order_id):
         return redirect(url_for('order_details', order_id=order_id))
     
     conn = get_db()
-    order = conn.execute('SELECT telegram_id FROM orders WHERE id = ?', (order_id,)).fetchone()
+    cursor = conn.cursor()
+    cursor.execute('SELECT telegram_id FROM orders WHERE id = %s', (order_id,))
+    order = cursor.fetchone()
     if order:
-        conn.execute('''
+        cursor.execute('''
             INSERT INTO messages (order_id, telegram_id, sender, text, message_text, message_type, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+            VALUES (%s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
         ''', (order_id, order['telegram_id'], 'admin', message_text, message_text, 'text'))
         conn.commit()
         
         send_telegram_notification(order['telegram_id'], f"💬 رسالة جديدة من الدعم:\n\n{message_text}")
         
+    cursor.close()
     conn.close()
     return redirect(url_for('order_details', order_id=order_id))
 
 @app.route("/products")
 def products():
     conn = get_db()
-    products = conn.execute("""
+    cursor = conn.cursor()
+    cursor.execute("""
         SELECT p.*, COUNT(pa.id) AS package_count
         FROM products p
         LEFT JOIN packages pa ON pa.product_id = p.id
         GROUP BY p.id
         ORDER BY p.id DESC
-    """).fetchall()
+    """)
+    products = cursor.fetchall()
+    cursor.close()
     conn.close()
     return render_template("products.html", products=products)
 
@@ -199,19 +224,25 @@ def add_product():
     description = request.form.get("description", "").strip()
     if name:
         conn = get_db()
-        conn.execute(
-            "INSERT INTO products (name, product_type, description, active) VALUES (?, ?, ?, 1)",
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO products (name, product_type, description, active) VALUES (%s, %s, %s, 1)",
             (name, product_type, description)
         )
         conn.commit()
+        cursor.close()
         conn.close()
     return redirect(url_for("products"))
 
 @app.route("/products/edit/<int:product_id>", methods=["GET", "POST"])
 def edit_product(product_id):
     conn = get_db()
-    product = conn.execute("SELECT * FROM products WHERE id = ?", (product_id,)).fetchone()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM products WHERE id = %s", (product_id,))
+    product = cursor.fetchone()
+
     if product is None:
+        cursor.close()
         conn.close()
         return redirect(url_for("products"))
 
@@ -222,42 +253,52 @@ def edit_product(product_id):
         active = 1 if request.form.get("active") else 0
         
         if not name:
+            cursor.close()
             conn.close()
             return render_template("product_edit.html", product=product, error="اسم المنتج مطلوب.")
 
-        conn.execute("""
+        cursor.execute("""
             UPDATE products
-            SET name = ?, product_type = ?, description = ?, active = ?
-            WHERE id = ?
+            SET name = %s, product_type = %s, description = %s, active = %s
+            WHERE id = %s
         """, (name, product_type, description, active, product_id))
         conn.commit()
+        cursor.close()
         conn.close()
         return redirect(url_for("products"))
 
+    cursor.close()
     conn.close()
     return render_template("product_edit.html", product=product)
 
 @app.route("/products/delete/<int:product_id>", methods=["POST"])
 def delete_product(product_id):
     conn = get_db()
-    conn.execute("DELETE FROM packages WHERE product_id = ?", (product_id,))
-    conn.execute("DELETE FROM products WHERE id = ?", (product_id,))
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM packages WHERE product_id = %s", (product_id,))
+    cursor.execute("DELETE FROM products WHERE id = %s", (product_id,))
     conn.commit()
+    cursor.close()
     conn.close()
     return redirect(url_for("products"))
 
 @app.route("/products/<int:product_id>/packages")
 def packages(product_id):
     conn = get_db()
-    product = conn.execute("SELECT * FROM products WHERE id = ?", (product_id,)).fetchone()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM products WHERE id = %s", (product_id,))
+    product = cursor.fetchone()
     if product is None:
+        cursor.close()
         conn.close()
         return redirect(url_for("products"))
 
-    packages = conn.execute(
-        "SELECT * FROM packages WHERE product_id = ? ORDER BY id DESC",
+    cursor.execute(
+        "SELECT * FROM packages WHERE product_id = %s ORDER BY id DESC",
         (product_id,)
-    ).fetchall()
+    )
+    packages = cursor.fetchall()
+    cursor.close()
     conn.close()
     return render_template("packages.html", product=product, packages=packages)
 
@@ -275,19 +316,25 @@ def add_package(product_id):
         price = 0
 
     conn = get_db()
-    conn.execute("""
+    cursor = conn.cursor()
+    cursor.execute("""
         INSERT INTO packages (product_id, name, price, active)
-        VALUES (?, ?, ?, 1)
+        VALUES (%s, %s, %s, 1)
     """, (product_id, name, price))
     conn.commit()
+    cursor.close()
     conn.close()
     return redirect(url_for("packages", product_id=product_id))
 
 @app.route("/packages/edit/<int:package_id>", methods=["GET", "POST"])
 def edit_package(package_id):
     conn = get_db()
-    package = conn.execute("SELECT * FROM packages WHERE id = ?", (package_id,)).fetchone()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM packages WHERE id = %s", (package_id,))
+    package = cursor.fetchone()
+
     if package is None:
+        cursor.close()
         conn.close()
         return redirect(url_for("products"))
 
@@ -297,43 +344,51 @@ def edit_package(package_id):
         active = 1 if request.form.get("active") else 0
 
         if not name:
+            cursor.close()
             conn.close()
             return render_template("packages_edit.html", package=package, error="اسم الباقة مطلوب.")
 
         try:
             price = float(price_text)
         except ValueError:
+            cursor.close()
             conn.close()
             return render_template("packages_edit.html", package=package, error="السعر غير صحيح.")
 
-        conn.execute("""
+        cursor.execute("""
             UPDATE packages
-            SET name = ?, price = ?, active = ?
-            WHERE id = ?
+            SET name = %s, price = %s, active = %s
+            WHERE id = %s
         """, (name, price, active, package_id))
         conn.commit()
         product_id = package["product_id"]
+        cursor.close()
         conn.close()
         return redirect(url_for("packages", product_id=product_id))
 
+    cursor.close()
     conn.close()
     return render_template("packages_edit.html", package=package)
 
 @app.route("/packages/delete/<int:package_id>", methods=["POST"])
 def delete_package(package_id):
     conn = get_db()
-    package = conn.execute("SELECT product_id FROM packages WHERE id = ?", (package_id,)).fetchone()
+    cursor = conn.cursor()
+    cursor.execute("SELECT product_id FROM packages WHERE id = %s", (package_id,))
+    package = cursor.fetchone()
+
     if package is None:
+        cursor.close()
         conn.close()
         return redirect(url_for("products"))
 
     product_id = package["product_id"]
-    conn.execute("DELETE FROM packages WHERE id = ?", (package_id,))
+    cursor.execute("DELETE FROM packages WHERE id = %s", (package_id,))
     conn.commit()
+    cursor.close()
     conn.close()
     return redirect(url_for("packages", product_id=product_id))
 
-init_products_db()
-
 if __name__ == "__main__":
+    init_products_db()
     app.run(host='0.0.0.0', port=5000)
