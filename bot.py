@@ -42,17 +42,6 @@ WAITING_RECEIPT = 3
 # قاعدة البيانات (PostgreSQL / Supabase)
 # ========================================================
 
-try:
-    await query.edit_message_text(text="NTEXT", reply_markup=KEYBOARD)
-except BadRequest as e:
-    if "Message is not modified" in str(e):
-        pass  # تجاهل الخطأ إذا كان النص هو نفسه
-    else:
-        raise e
-
-
-
-
 
 
 def get_db():
@@ -226,6 +215,20 @@ def main_menu():
     return InlineKeyboardMarkup(keyboard)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    try:
+    await query.edit_message_text(text="NTEXT", reply_markup=KEYBOARD)
+    except BadRequest as e:
+    if "Message is not modified" in str(e):
+        pass  # تجاهل الخطأ إذا كان النص هو نفسه
+    else:
+        raise e
+
+
+
+
+
+    
     context.user_data.clear()
     user = update.effective_user
 
