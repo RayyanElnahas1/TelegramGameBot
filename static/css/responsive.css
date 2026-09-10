@@ -1,0 +1,97 @@
+/* =========================================================
+   Responsive
+========================================================= */
+
+@media (max-width: 992px) {
+
+    .sidebar {
+        transform: translateX(100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        width: 100%;
+
+        margin-right: 0;
+    }
+
+    .content-area {
+        padding: 20px;
+    }
+
+    .chat-layout {
+        grid-template-columns: 240px 1fr;
+    }
+}
+
+
+@media (max-width: 768px) {
+
+    .topbar {
+        padding: 0 15px;
+    }
+
+    .content-area {
+        padding: 15px;
+    }
+
+    .page-heading small {
+        display: none;
+    }
+
+    .dashboard-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .chat-layout {
+        grid-template-columns: 1fr;
+
+        height: calc(100vh - 110px);
+    }
+
+    .chat-list {
+        display: none;
+    }
+
+    .message-bubble {
+        max-width: 85%;
+    }
+}
+
+
+@media (max-width: 576px) {
+
+    .topbar {
+        height: 65px;
+    }
+
+    .page-heading h4 {
+        font-size: 15px;
+    }
+
+    .icon-button {
+        width: 38px;
+        height: 38px;
+    }
+
+    .content-area {
+        padding: 12px;
+    }
+
+    .stat-card {
+        padding: 16px;
+    }
+
+    .stat-value {
+        font-size: 23px;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+}

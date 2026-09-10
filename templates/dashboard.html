@@ -1,0 +1,587 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+
+لوحة التحكم
+
+{% endblock %}
+
+
+{% block page_heading %}
+
+لوحة التحكم
+
+{% endblock %}
+
+
+{% block page_description %}
+
+نظرة عامة على طلبات الشحن
+
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/dashboard.css') }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =========================================================
+     Dashboard Header
+========================================================= -->
+
+<div class="dashboard-header">
+
+
+    <div class="dashboard-title">
+
+
+        <h2>
+            👋 أهلاً بيك في لوحة التحكم
+        </h2>
+
+
+        <p>
+            من هنا تقدر تتابع الطلبات والعملاء وحالة عمليات الشحن.
+        </p>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     Statistics
+========================================================= -->
+
+<div class="row g-3 dashboard-stats">
+
+
+    <!-- Total Orders -->
+
+    <div class="col-12 col-sm-6 col-xl-3">
+
+        <div class="stat-card">
+
+
+            <div class="stat-icon dashboard-stat-icon-primary">
+
+                <i class="bi bi-bag-check-fill"></i>
+
+            </div>
+
+
+            <div class="stat-title">
+
+                إجمالي الطلبات
+
+            </div>
+
+
+            <div class="stat-value">
+
+                {{ orders|length }}
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Pending -->
+
+    <div class="col-12 col-sm-6 col-xl-3">
+
+        <div class="stat-card">
+
+
+            <div class="stat-icon dashboard-stat-icon-warning">
+
+                <i class="bi bi-hourglass-split"></i>
+
+            </div>
+
+
+            <div class="stat-title">
+
+                الطلبات المعلقة
+
+            </div>
+
+
+            <div class="stat-value">
+
+                {{
+                    orders
+                    |selectattr("status", "equalto", "pending")
+                    |list
+                    |length
+                }}
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Paid -->
+
+    <div class="col-12 col-sm-6 col-xl-3">
+
+        <div class="stat-card">
+
+
+            <div class="stat-icon dashboard-stat-icon-info">
+
+                <i class="bi bi-credit-card-fill"></i>
+
+            </div>
+
+
+            <div class="stat-title">
+
+                تم الدفع
+
+            </div>
+
+
+            <div class="stat-value">
+
+                {{
+                    orders
+                    |selectattr("status", "equalto", "paid")
+                    |list
+                    |length
+                }}
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Shipped -->
+
+    <div class="col-12 col-sm-6 col-xl-3">
+
+        <div class="stat-card">
+
+
+            <div class="stat-icon dashboard-stat-icon-success">
+
+                <i class="bi bi-check-circle-fill"></i>
+
+            </div>
+
+
+            <div class="stat-title">
+
+                تم الشحن
+
+            </div>
+
+
+            <div class="stat-value">
+
+                {{
+                    orders
+                    |selectattr("status", "equalto", "shipped")
+                    |list
+                    |length
+                }}
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     Recent Orders
+========================================================= -->
+
+<div class="recent-orders dashboard-card">
+
+
+    <!-- Section Header -->
+
+    <div class="section-header">
+
+
+        <div>
+
+
+            <h5>
+                📋 أحدث الطلبات
+            </h5>
+
+
+            <p>
+                آخر طلبات الشحن المسجلة في النظام.
+            </p>
+
+
+        </div>
+
+
+
+        <!-- View All Orders -->
+
+        <a
+            href="{{ url_for('orders') }}"
+            class="view-all-orders"
+        >
+
+            عرض كل الطلبات
+
+            <i class="bi bi-arrow-left"></i>
+
+        </a>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         Orders
+    ====================================================== -->
+
+    {% if orders %}
+
+
+    <div class="table-container">
+
+
+        <div class="table-responsive">
+
+
+            <table class="table align-middle mb-0">
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            رقم الطلب
+                        </th>
+
+                        <th>
+                            العميل
+                        </th>
+
+                        <th>
+                            اللعبة
+                        </th>
+
+                        <th>
+                            الباقة
+                        </th>
+
+                        <th>
+                            ID اللاعب
+                        </th>
+
+                        <th>
+                            السعر
+                        </th>
+
+                        <th>
+                            الحالة
+                        </th>
+
+                        <th>
+                            التاريخ
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+
+                <tbody>
+
+
+                {% for order in orders[:10] %}
+
+
+                    <tr>
+
+
+                        <!-- Order ID -->
+
+                        <td>
+
+                            <span class="order-id">
+
+                                #{{ order["id"] }}
+
+                            </span>
+
+                        </td>
+
+
+
+                        <!-- Customer -->
+
+                        <td>
+
+
+                            <div class="customer-name">
+
+                                {{ order["customer_name"] }}
+
+                            </div>
+
+
+                            {% if order["username"] %}
+
+                                <span class="customer-username">
+
+                                    @{{ order["username"] }}
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="customer-username">
+
+                                    بدون Username
+
+                                </span>
+
+                            {% endif %}
+
+
+                        </td>
+
+
+
+                        <!-- Game -->
+
+                        <td>
+
+                            {{ order["game"] }}
+
+                        </td>
+
+
+
+                        <!-- Package -->
+
+                        <td>
+
+                            {{ order["package"] }}
+
+                        </td>
+
+
+
+                        <!-- Player ID -->
+
+                        <td>
+
+                            {{ order["player_id"] }}
+
+                        </td>
+
+
+
+                        <!-- Price -->
+
+                        <td>
+
+                            <strong>
+
+                                {{ "%.2f"|format(order["final_price"]|float) }}
+
+                            </strong>
+
+                            جنيه
+
+                        </td>
+
+
+
+                        <!-- Status -->
+
+                        <td>
+
+
+                            {% if order["status"] == "pending" %}
+
+
+                                <span class="status status-pending">
+
+                                    <i class="bi bi-clock"></i>
+
+                                    قيد المراجعة
+
+                                </span>
+
+
+                            {% elif order["status"] == "paid" %}
+
+
+                                <span class="status status-paid">
+
+                                    <i class="bi bi-credit-card"></i>
+
+                                    تم الدفع
+
+                                </span>
+
+
+                            {% elif order["status"] == "shipped" %}
+
+
+                                <span class="status status-shipped">
+
+                                    <i class="bi bi-check-circle"></i>
+
+                                    تم الشحن
+
+                                </span>
+
+
+                            {% elif order["status"] == "rejected" %}
+
+
+                                <span class="status status-rejected">
+
+                                    <i class="bi bi-x-circle"></i>
+
+                                    مرفوض
+
+                                </span>
+
+
+                            {% else %}
+
+
+                                <span class="status">
+
+                                    {{ order["status"] }}
+
+                                </span>
+
+
+                            {% endif %}
+
+
+                        </td>
+
+
+
+                        <!-- Date -->
+
+                        <td>
+
+                            <span class="order-date">
+
+                                {{ order["created_at"] }}
+
+                            </span>
+
+                        </td>
+
+
+                    </tr>
+
+
+                {% endfor %}
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    {% else %}
+
+
+    <!-- =====================================================
+         Empty State
+    ====================================================== -->
+
+    <div class="empty-state">
+
+
+        <i class="bi bi-inbox"></i>
+
+
+        <h6>
+
+            لا توجد طلبات حتى الآن
+
+        </h6>
+
+
+        <p>
+
+            عندما يقوم أحد العملاء بإنشاء طلب، سيظهر هنا.
+
+        </p>
+
+
+    </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+{% endblock %}
+
+
+
+<!-- =========================================================
+     Dashboard JavaScript
+========================================================= -->
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for('static', filename='js/dashboard.js') }}"
+></script>
+
+{% endblock %}

@@ -1,0 +1,560 @@
+{% extends "base.html" %}
+
+{% block title %}
+الطلبات
+{% endblock %}
+
+{% block page_heading %}
+الطلبات
+{% endblock %}
+
+{% block page_description %}
+إدارة ومتابعة جميع طلبات الشحن
+{% endblock %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/orders.css') }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="orders-page">
+
+    <!-- =====================================================
+         Header
+    ====================================================== -->
+
+    <div class="orders-header">
+
+        <div>
+
+            <h2>
+                📦 جميع الطلبات
+            </h2>
+
+            <p>
+                تابع حالة طلبات الشحن والعملاء من هنا.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Statistics
+    ====================================================== -->
+
+    <div class="orders-stats">
+
+
+        <!-- Total -->
+
+        <div class="order-stat-card">
+
+            <div class="order-stat-icon">
+                <i class="bi bi-bag-fill"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    إجمالي الطلبات
+                </span>
+
+                <strong>
+                    {{ orders|length }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- Pending -->
+
+        <div class="order-stat-card">
+
+            <div class="order-stat-icon pending-icon">
+                <i class="bi bi-clock-fill"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    قيد المراجعة
+                </span>
+
+                <strong>
+
+                    {{
+                        orders
+                        |selectattr("status", "equalto", "pending")
+                        |list
+                        |length
+                    }}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- Paid -->
+
+        <div class="order-stat-card">
+
+            <div class="order-stat-icon paid-icon">
+                <i class="bi bi-credit-card-fill"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    تم الدفع
+                </span>
+
+                <strong>
+
+                    {{
+                        orders
+                        |selectattr("status", "equalto", "paid")
+                        |list
+                        |length
+                    }}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- Shipped -->
+
+        <div class="order-stat-card">
+
+            <div class="order-stat-icon shipped-icon">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+
+            <div>
+
+                <span>
+                    تم الشحن
+                </span>
+
+                <strong>
+
+                    {{
+                        orders
+                        |selectattr("status", "equalto", "shipped")
+                        |list
+                        |length
+                    }}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         Orders Card
+    ====================================================== -->
+
+    <div class="orders-card">
+
+
+        <!-- =================================================
+             Toolbar
+        ================================================== -->
+
+        <div class="orders-toolbar">
+
+
+            <!-- Search -->
+
+            <div class="search-box">
+
+                <i class="bi bi-search"></i>
+
+                <input
+                    type="text"
+                    id="orderSearch"
+                    placeholder="ابحث برقم الطلب أو اسم العميل أو ID اللاعب..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <!-- Filter -->
+
+            <div class="filter-box">
+
+                <select id="statusFilter">
+
+                    <option value="all">
+                        كل الحالات
+                    </option>
+
+                    <option value="pending">
+                        ⏳ قيد المراجعة
+                    </option>
+
+                    <option value="paid">
+                        💳 تم الدفع
+                    </option>
+
+                    <option value="shipped">
+                        ✅ تم الشحن
+                    </option>
+
+                    <option value="rejected">
+                        ❌ مرفوض
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             Orders
+        ================================================== -->
+
+        {% if orders %}
+
+        <div class="orders-table-wrapper">
+
+            <table class="orders-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            الطلب
+                        </th>
+
+                        <th>
+                            العميل
+                        </th>
+
+                        <th>
+                            اللعبة
+                        </th>
+
+                        <th>
+                            الباقة
+                        </th>
+
+                        <th>
+                            ID اللاعب
+                        </th>
+
+                        <th>
+                            السعر
+                        </th>
+
+                        <th>
+                            الحالة
+                        </th>
+
+                        <th>
+                            التاريخ
+                        </th>
+
+                        <th>
+                            التفاصيل
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="ordersTableBody">
+
+                {% for order in orders %}
+
+                    <tr
+                        class="order-row"
+                        data-status="{{ order['status'] }}"
+                    >
+
+
+                        <!-- =================================
+                             Order ID
+                        ================================== -->
+
+                        <td>
+
+                            <span class="order-number">
+                                #{{ order["id"] }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- =================================
+                             Customer
+                        ================================== -->
+
+                        <td>
+
+                            <div class="order-customer">
+
+                                <strong>
+                                    {{ order["customer_name"] }}
+                                </strong>
+
+                                {% if order["username"] %}
+
+                                    <span>
+                                        @{{ order["username"] }}
+                                    </span>
+
+                                {% else %}
+
+                                    <span>
+                                        بدون Username
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- =================================
+                             Game
+                        ================================== -->
+
+                        <td>
+
+                            <span class="game-name">
+                                {{ order["game"] }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- =================================
+                             Package
+                        ================================== -->
+
+                        <td>
+                            {{ order["package"] }}
+                        </td>
+
+
+                        <!-- =================================
+                             Player ID
+                        ================================== -->
+
+                        <td>
+
+                            <code>
+                                {{ order["player_id"] }}
+                            </code>
+
+                        </td>
+
+
+                        <!-- =================================
+                             Price
+                        ================================== -->
+
+                        <td>
+
+                            <strong>
+                                {{ order["final_price"] }}
+                            </strong>
+
+                            جنيه
+
+                        </td>
+
+
+                        <!-- =================================
+                             Status
+                        ================================== -->
+
+                        <td>
+
+                            {% if order["status"] == "pending" %}
+
+                                <span class="order-status status-pending">
+
+                                    <i class="bi bi-clock"></i>
+
+                                    قيد المراجعة
+
+                                </span>
+
+
+                            {% elif order["status"] == "paid" %}
+
+                                <span class="order-status status-paid">
+
+                                    <i class="bi bi-credit-card"></i>
+
+                                    تم الدفع
+
+                                </span>
+
+
+                            {% elif order["status"] == "shipped" %}
+
+                                <span class="order-status status-shipped">
+
+                                    <i class="bi bi-check-circle"></i>
+
+                                    تم الشحن
+
+                                </span>
+
+
+                            {% elif order["status"] == "rejected" %}
+
+                                <span class="order-status status-rejected">
+
+                                    <i class="bi bi-x-circle"></i>
+
+                                    مرفوض
+
+                                </span>
+
+
+                            {% else %}
+
+                                <span class="order-status">
+
+                                    {{ order["status"] }}
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- =================================
+                             Date
+                        ================================== -->
+
+                        <td>
+
+                            <span class="order-date">
+                                {{ order["created_at"] }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- =================================
+                             Details
+                        ================================== -->
+
+                        <td>
+
+                            <a
+    href="{{ url_for('order_details', order_id=order['id']) }}"
+    class="order-details-btn"
+    title="تفاصيل الطلب"
+>
+    <i class="bi bi-eye-fill"></i>
+</a>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- =================================================
+             No Search Results
+        ================================================== -->
+
+        <div
+            id="noOrdersFound"
+            class="no-orders-found"
+            style="display: none;"
+        >
+
+            <i class="bi bi-search"></i>
+
+            <h5>
+                لا توجد نتائج
+            </h5>
+
+            <p>
+                جرب البحث بكلمة مختلفة أو غيّر الفلتر.
+            </p>
+
+        </div>
+
+
+        {% else %}
+
+
+        <!-- =================================================
+             Empty State
+        ================================================== -->
+
+        <div class="orders-empty">
+
+            <i class="bi bi-inbox"></i>
+
+            <h5>
+                لا توجد طلبات
+            </h5>
+
+            <p>
+                لم يتم إنشاء أي طلبات شحن حتى الآن.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+<!-- =========================================================
+     JavaScript
+========================================================= -->
+
+{% block extra_js %}
+
+<script
+    src="{{ url_for('static', filename='js/orders.js') }}"
+></script>
+
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}
+المنتجات
+{% endblock %}
+
+{% block page_heading %}
+المنتجات
+{% endblock %}
+
+{% block page_description %}
+إدارة الألعاب والخدمات والباقات
+{% endblock %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/products.css') }}"
+>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="products-page">
+
+    <div class="products-header">
+
+        <div>
+            <h2>🛍️ المنتجات</h2>
+
+            <p>
+                أضف الألعاب والخدمات التي تريد بيعها من لوحة التحكم.
+            </p>
+        </div>
+
+    </div>
+
+
+    <div class="product-form-card">
+
+        <div class="card-title">
+            <i class="bi bi-plus-circle-fill"></i>
+
+            <div>
+                <h4>إضافة منتج جديد</h4>
+
+                <p>
+                    لعبة أو خدمة رقمية
+                </p>
+            </div>
+        </div>
+
+
+        <form
+            method="POST"
+            action="{{ url_for('add_product') }}"
+        >
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label>
+                        اسم المنتج
+                    </label>
+
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="مثال: PUBG Mobile"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        النوع
+                    </label>
+
+                    <select name="product_type">
+
+                        <option value="game">
+                            🎮 لعبة
+                        </option>
+
+                        <option value="service">
+                            ⚡ خدمة
+                        </option>
+
+                        <option value="card">
+                            💳 كارت شحن
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    الوصف
+                </label>
+
+                <textarea
+                    name="description"
+                    rows="3"
+                    placeholder="وصف اختياري للمنتج..."
+                ></textarea>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="glass-button"
+            >
+
+                <i class="bi bi-plus-lg"></i>
+
+                إضافة المنتج
+
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <div class="products-grid">
+
+        {% if products %}
+
+            {% for product in products %}
+
+            <div class="product-card">
+
+                <div class="product-icon">
+
+                    {% if product["product_type"] == "game" %}
+                        <i class="bi bi-controller"></i>
+                    {% elif product["product_type"] == "service" %}
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    {% else %}
+                        <i class="bi bi-credit-card-fill"></i>
+                    {% endif %}
+
+                </div>
+
+
+                <div class="product-info">
+
+                    <h3>
+                        {{ product["name"] }}
+                    </h3>
+
+                    <p>
+                        {{ product["description"] or "بدون وصف" }}
+                    </p>
+
+                    <span class="package-count">
+                        {{ product["package_count"] }}
+                        باقة
+                    </span>
+
+                </div>
+
+
+                <div class="product-actions">
+
+    <a
+        href="{{ url_for('edit_product', product_id=product['id']) }}"
+        class="product-action edit-action"
+        title="تعديل المنتج"
+    >
+        <i class="bi bi-pencil-fill"></i>
+    </a>
+
+
+    <a
+    href="{{ url_for('packages', product_id=product['id']) }}"
+    class="product-action"
+    title="إدارة الباقات"
+>
+    <i class="bi bi-box-seam"></i>
+</a>
+
+
+    <form
+        method="POST"
+        action="{{ url_for('delete_product', product_id=product['id']) }}"
+        onsubmit="return confirm('هل تريد حذف هذا المنتج؟');"
+    >
+
+        <button
+            type="submit"
+            class="product-action delete-action"
+            title="حذف"
+        >
+            <i class="bi bi-trash3-fill"></i>
+        </button>
+
+    </form>
+
+</div>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="products-empty">
+
+                <i class="bi bi-box-seam"></i>
+
+                <h3>
+                    لا توجد منتجات
+                </h3>
+
+                <p>
+                    أضف أول لعبة أو خدمة من النموذج بالأعلى.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

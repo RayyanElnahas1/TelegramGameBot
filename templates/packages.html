@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+
+{% block title %}
+باقات {{ product["name"] }}
+{% endblock %}
+
+{% block page_heading %}
+الباقات
+{% endblock %}
+
+{% block page_description %}
+إدارة أسعار وباقات {{ product["name"] }}
+{% endblock %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/packages.css') }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="packages-page">
+
+
+    <!-- Header -->
+
+    <div class="packages-header">
+
+        <div>
+
+            <div class="back-link">
+
+                <a href="{{ url_for('products') }}">
+
+                    <i class="bi bi-arrow-right"></i>
+
+                    المنتجات
+
+                </a>
+
+            </div>
+
+
+            <h2>
+                📦 باقات {{ product["name"] }}
+            </h2>
+
+            <p>
+                أضف وعدّل أسعار الباقات الخاصة بهذا المنتج.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- Add Package -->
+
+    <div class="package-form-card">
+
+        <div class="package-form-title">
+
+            <div class="package-title-icon">
+
+                <i class="bi bi-plus-lg"></i>
+
+            </div>
+
+            <div>
+
+                <h4>
+                    إضافة باقة جديدة
+                </h4>
+
+                <p>
+                    أدخل اسم الباقة والسعر.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <form
+            method="POST"
+            action="{{ url_for('add_package', product_id=product['id']) }}"
+        >
+
+            <div class="package-form-grid">
+
+
+                <!-- Name -->
+
+                <div class="form-group">
+
+                    <label>
+                        اسم الباقة
+                    </label>
+
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="مثال: 660 UC"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Price -->
+
+                <div class="form-group">
+
+                    <label>
+                        السعر بالجنيه
+                    </label>
+
+                    <input
+                        type="number"
+                        name="price"
+                        min="0"
+                        step="0.01"
+                        placeholder="مثال: 450"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Active -->
+
+                <div class="form-group package-active">
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            name="active"
+                            checked
+                        >
+
+                        الباقة مفعلة
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="glass-button"
+            >
+
+                <i class="bi bi-plus-circle-fill"></i>
+
+                إضافة الباقة
+
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- Packages -->
+
+    <div class="packages-card">
+
+        <div class="packages-card-header">
+
+            <div>
+
+                <h4>
+                    الباقات الحالية
+                </h4>
+
+                <p>
+                    {{ packages|length }} باقة
+                </p>
+
+            </div>
+
+        </div>
+
+
+        {% if packages %}
+
+        <div class="packages-list">
+
+            {% for package in packages %}
+
+            <div class="package-row">
+
+
+                <!-- Icon -->
+
+                <div class="package-icon">
+
+                    <i class="bi bi-box-seam-fill"></i>
+
+                </div>
+
+
+                <!-- Info -->
+
+                <div class="package-info">
+
+                    <h3>
+                        {{ package["name"] }}
+                    </h3>
+
+
+                    {% if package["active"] %}
+
+                    <span class="package-status active">
+                        <i class="bi bi-check-circle-fill"></i>
+                        مفعلة
+                    </span>
+
+                    {% else %}
+
+                    <span class="package-status inactive">
+                        <i class="bi bi-x-circle-fill"></i>
+                        غير مفعلة
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Price -->
+
+                <div class="package-price">
+
+                    <strong>
+                        {{ package["price"] }}
+                    </strong>
+
+                    <span>
+                        جنيه
+                    </span>
+
+                </div>
+
+
+                <!-- Actions -->
+
+                <div class="package-actions">
+
+                    <a
+                        href="{{ url_for('edit_package', package_id=package['id']) }}"
+                        class="package-action edit"
+                        title="تعديل"
+                    >
+
+                        <i class="bi bi-pencil-fill"></i>
+
+                    </a>
+
+
+                    <form
+                        method="POST"
+                        action="{{ url_for('delete_package', package_id=package['id']) }}"
+                        onsubmit="return confirm('هل تريد حذف هذه الباقة؟');"
+                    >
+
+                        <button
+                            type="submit"
+                            class="package-action delete"
+                            title="حذف"
+                        >
+
+                            <i class="bi bi-trash3-fill"></i>
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+
+        {% else %}
+
+
+        <div class="packages-empty">
+
+            <i class="bi bi-box-seam"></i>
+
+            <h4>
+                لا توجد باقات
+            </h4>
+
+            <p>
+                أضف أول باقة لهذا المنتج من النموذج بالأعلى.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

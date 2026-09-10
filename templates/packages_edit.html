@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}
+تعديل الباقة
+{% endblock %}
+
+{% block page_heading %}
+تعديل الباقة
+{% endblock %}
+
+{% block page_description %}
+تعديل اسم وسعر الباقة
+{% endblock %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/packages.css') }}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="packages-page">
+
+
+    <div class="packages-header">
+
+        <div>
+
+            <h2>
+                ✏️ تعديل الباقة
+            </h2>
+
+            <p>
+                عدّل اسم الباقة أو سعرها ثم احفظ التغييرات.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="package-form-card edit-package-card">
+
+
+        {% if error %}
+
+        <div class="package-error">
+
+            <i class="bi bi-exclamation-triangle-fill"></i>
+
+            {{ error }}
+
+        </div>
+
+        {% endif %}
+
+
+        <form
+            method="POST"
+            action="{{ url_for('edit_package', package_id=package['id']) }}"
+        >
+
+
+            <div class="form-group">
+
+                <label>
+                    اسم الباقة
+                </label>
+
+                <input
+                    type="text"
+                    name="name"
+                    value="{{ package['name'] }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    السعر بالجنيه
+                </label>
+
+                <input
+                    type="number"
+                    name="price"
+                    value="{{ package['price'] }}"
+                    min="0"
+                    step="0.01"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group package-active">
+
+                <label>
+
+                    <input
+                        type="checkbox"
+                        name="active"
+                        {% if package['active'] %}
+                        checked
+                        {% endif %}
+                    >
+
+                    الباقة مفعلة
+
+                </label>
+
+            </div>
+
+
+            <div class="edit-package-actions">
+
+                <button
+                    type="submit"
+                    class="glass-button"
+                >
+
+                    <i class="bi bi-check-lg"></i>
+
+                    حفظ التغييرات
+
+                </button>
+
+
+                <a
+                    href="{{ url_for('packages', product_id=package['product_id']) }}"
+                    class="cancel-button"
+                >
+
+                    إلغاء
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

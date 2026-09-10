@@ -1,0 +1,686 @@
+/* =========================================================
+   Dashboard - Liquid Glass
+========================================================= */
+
+.dashboard-header {
+    position: relative;
+    overflow: hidden;
+
+    padding: 24px;
+
+    margin-bottom: 24px;
+
+    border: 1px solid var(--border);
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.16),
+            rgba(255, 255, 255, 0.05)
+        ),
+        var(--surface);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+
+    animation: dashboardFadeIn 0.45s ease;
+}
+
+.dashboard-header::before {
+    content: "";
+
+    position: absolute;
+
+    width: 220px;
+    height: 220px;
+
+    top: -130px;
+    left: -70px;
+
+    border-radius: 50%;
+
+    background: var(--primary);
+
+    opacity: 0.08;
+
+    filter: blur(50px);
+
+    pointer-events: none;
+}
+
+.dashboard-title {
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-title h2 {
+    margin: 0 0 8px;
+
+    color: var(--text);
+
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.dashboard-title p {
+    margin: 0;
+
+    color: var(--text-secondary);
+
+    font-size: 14px;
+}
+
+/* =========================================================
+   Statistics
+========================================================= */
+
+.dashboard-stats {
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    position: relative;
+    overflow: hidden;
+
+    height: 100%;
+
+    padding: 20px;
+
+    border: 1px solid var(--border);
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.17),
+            rgba(255, 255, 255, 0.05)
+        ),
+        var(--surface);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+
+    animation: dashboardCardIn 0.5s ease both;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+
+    border-color: var(--primary);
+
+    box-shadow:
+        0 16px 35px rgba(0, 0, 0, 0.11),
+        0 0 0 1px rgba(99, 102, 241, 0.07);
+}
+
+.stat-card::after {
+    content: "";
+
+    position: absolute;
+
+    width: 120px;
+    height: 120px;
+
+    left: -60px;
+    bottom: -65px;
+
+    border-radius: 50%;
+
+    background: var(--primary);
+
+    opacity: 0.05;
+
+    filter: blur(25px);
+
+    pointer-events: none;
+}
+
+/* =========================================================
+   Stat Icon
+========================================================= */
+
+.stat-icon {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 15px;
+
+    border-radius: 15px;
+
+    font-size: 21px;
+}
+
+.dashboard-stat-icon-primary {
+    background: rgba(99, 102, 241, 0.12);
+    color: var(--primary);
+}
+
+.dashboard-stat-icon-warning {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+}
+
+.dashboard-stat-icon-info {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+}
+
+.dashboard-stat-icon-success {
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
+}
+
+/* =========================================================
+   Stat Text
+========================================================= */
+
+.stat-title {
+    margin-bottom: 5px;
+
+    color: var(--text-secondary);
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.stat-value {
+    color: var(--text);
+
+    font-size: 28px;
+    font-weight: 800;
+}
+
+/* =========================================================
+   Recent Orders Card
+========================================================= */
+
+.recent-orders {
+    width: 100%;
+
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+    border-radius: 22px;
+
+    background: var(--surface);
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.06);
+
+    animation: dashboardFadeIn 0.55s ease;
+}
+
+/* =========================================================
+   Dashboard Card
+========================================================= */
+
+.dashboard-card {
+    position: relative;
+}
+
+/* =========================================================
+   Section Header
+========================================================= */
+
+.section-header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 20px;
+
+    border-bottom: 1px solid var(--border);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.12),
+            rgba(255, 255, 255, 0.035)
+        );
+
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.section-header h5 {
+    margin: 0 0 5px;
+
+    color: var(--text);
+
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.section-header p {
+    margin: 0;
+
+    color: var(--text-secondary);
+
+    font-size: 12px;
+}
+
+/* =========================================================
+   View All
+========================================================= */
+
+.view-all-orders {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 8px 12px;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.05);
+
+    color: var(--primary);
+
+    text-decoration: none;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.view-all-orders:hover {
+    transform: translateY(-2px);
+
+    border-color: var(--primary);
+
+    background: rgba(99, 102, 241, 0.08);
+
+    color: var(--primary);
+}
+
+.view-all-orders i {
+    transition: transform 0.2s ease;
+}
+
+.view-all-orders:hover i {
+    transform: translateX(-3px);
+}
+
+/* =========================================================
+   Table Container
+========================================================= */
+
+.table-container {
+    width: 100%;
+
+    overflow-x: auto;
+
+    scrollbar-width: thin;
+}
+
+.table-container::-webkit-scrollbar {
+    height: 7px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--border);
+
+    border-radius: 20px;
+}
+
+/* =========================================================
+   Dashboard Table
+========================================================= */
+
+.recent-orders .table {
+    width: 100%;
+
+    min-width: 950px;
+
+    margin: 0;
+
+    color: var(--text);
+}
+
+.recent-orders .table thead {
+    background: var(--background);
+}
+
+.recent-orders .table th {
+    padding: 14px 12px;
+
+    border-bottom: 1px solid var(--border);
+
+    color: var(--text-secondary);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-align: center;
+
+    white-space: nowrap;
+}
+
+.recent-orders .table td {
+    padding: 14px 12px;
+
+    border-bottom: 1px solid var(--border);
+
+    color: var(--text);
+
+    font-size: 12px;
+
+    text-align: center;
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+}
+
+.recent-orders .table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.recent-orders .table tbody tr:hover {
+    background: rgba(99, 102, 241, 0.045);
+}
+
+.recent-orders .table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* =========================================================
+   Order ID
+========================================================= */
+
+.order-id {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 6px 9px;
+
+    border-radius: 8px;
+
+    background: rgba(99, 102, 241, 0.09);
+
+    color: var(--primary);
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+/* =========================================================
+   Customer
+========================================================= */
+
+.customer-name {
+    color: var(--text);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.customer-username {
+    display: block;
+
+    margin-top: 3px;
+
+    color: var(--text-secondary);
+
+    font-size: 10px;
+}
+
+/* =========================================================
+   Status
+========================================================= */
+
+.status {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    padding: 6px 9px;
+
+    border-radius: 999px;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.status-pending {
+    background: rgba(245, 158, 11, 0.12);
+
+    color: #d97706;
+}
+
+.status-paid {
+    background: rgba(59, 130, 246, 0.12);
+
+    color: #2563eb;
+}
+
+.status-shipped {
+    background: rgba(34, 197, 94, 0.12);
+
+    color: #16a34a;
+}
+
+.status-rejected {
+    background: rgba(239, 68, 68, 0.12);
+
+    color: #dc2626;
+}
+
+/* =========================================================
+   Empty State
+========================================================= */
+
+.empty-state {
+    padding: 65px 20px;
+
+    text-align: center;
+
+    color: var(--text-secondary);
+}
+
+.empty-state i {
+    display: block;
+
+    margin-bottom: 15px;
+
+    font-size: 42px;
+
+    opacity: 0.45;
+}
+
+.empty-state h6 {
+    margin: 0 0 7px;
+
+    color: var(--text);
+
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.empty-state p {
+    margin: 0;
+
+    font-size: 12px;
+}
+
+/* =========================================================
+   Dark Mode
+========================================================= */
+
+[data-theme="dark"] .dashboard-header,
+[data-theme="dark"] .stat-card {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.07),
+            rgba(255, 255, 255, 0.025)
+        ),
+        var(--surface);
+
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .section-header {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.055),
+            rgba(255, 255, 255, 0.015)
+        );
+}
+
+[data-theme="dark"] .recent-orders .table thead {
+    background: rgba(255, 255, 255, 0.025);
+}
+
+[data-theme="dark"] .recent-orders .table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.035);
+}
+
+/* =========================================================
+   Animations
+========================================================= */
+
+@keyframes dashboardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes dashboardCardIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================================
+   Responsive
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .dashboard-title h2 {
+        font-size: 21px;
+    }
+
+    .section-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .view-all-orders {
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .dashboard-header {
+        padding: 18px;
+
+        border-radius: 18px;
+    }
+
+    .dashboard-title h2 {
+        font-size: 19px;
+    }
+
+    .dashboard-title p {
+        font-size: 12px;
+
+        line-height: 1.7;
+    }
+
+    .stat-card {
+        padding: 17px;
+
+        border-radius: 17px;
+    }
+
+    .stat-icon {
+        width: 46px;
+        height: 46px;
+
+        border-radius: 13px;
+
+        font-size: 18px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+    }
+
+    .recent-orders {
+        border-radius: 18px;
+    }
+
+    .section-header {
+        padding: 16px;
+    }
+
+    .section-header h5 {
+        font-size: 14px;
+    }
+
+    .section-header p {
+        font-size: 11px;
+    }
+
+}

@@ -1,0 +1,691 @@
+/* =========================================================
+   Packages
+========================================================= */
+
+.packages-page {
+    padding: 4px;
+}
+
+
+/* Header */
+
+.packages-header {
+    margin-bottom: 22px;
+}
+
+.packages-header h2 {
+    margin: 8px 0 6px;
+    font-weight: 850;
+}
+
+.packages-header p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+
+/* Back */
+
+.back-link a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    color: var(--text-secondary);
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    transition: 0.2s ease;
+}
+
+.back-link a:hover {
+    color: var(--primary);
+}
+
+
+/* Glass */
+
+.package-form-card,
+.packages-card {
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.14),
+            rgba(255,255,255,0.05)
+        );
+
+    border:
+        1px solid
+        rgba(255,255,255,0.16);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    box-shadow:
+        0 12px 38px rgba(0,0,0,0.08),
+        inset 0 1px 0
+        rgba(255,255,255,0.12);
+
+    border-radius: 22px;
+}
+
+
+/* Add Form */
+
+.package-form-card {
+    padding: 24px;
+    margin-bottom: 22px;
+}
+
+
+.package-form-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+
+    margin-bottom: 22px;
+}
+
+
+.package-title-icon {
+
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 14px;
+
+    background:
+        rgba(99,102,241,0.14);
+
+    color: var(--primary);
+
+    font-size: 20px;
+}
+
+
+.package-form-title h4 {
+    margin: 0;
+
+    font-weight: 800;
+}
+
+
+.package-form-title p {
+
+    margin: 3px 0 0;
+
+    color: var(--text-secondary);
+
+    font-size: 13px;
+}
+
+
+/* Form */
+
+.package-form-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        220px
+        170px;
+
+    gap: 16px;
+
+    align-items: end;
+}
+
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+
+.form-group label {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-weight: 700;
+
+    font-size: 13px;
+}
+
+
+.form-group input {
+
+    width: 100%;
+
+    border:
+        1px solid
+        var(--border);
+
+    background:
+        rgba(255,255,255,0.07);
+
+    color: var(--text);
+
+    border-radius: 13px;
+
+    padding: 12px 14px;
+
+    outline: none;
+
+    transition: 0.2s ease;
+}
+
+
+.form-group input:focus {
+
+    border-color:
+        var(--primary);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(99,102,241,0.12);
+}
+
+
+/* Active */
+
+.package-active {
+    margin-bottom: 16px;
+}
+
+
+.package-active label {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    cursor: pointer;
+
+    padding-top: 12px;
+}
+
+
+.package-active input {
+
+    width: 18px;
+    height: 18px;
+
+    accent-color:
+        var(--primary);
+}
+
+
+/* Button */
+
+.glass-button {
+
+    border:
+        1px solid
+        rgba(255,255,255,0.18);
+
+    background:
+        rgba(99,102,241,0.18);
+
+    color: var(--text);
+
+    padding: 11px 18px;
+
+    border-radius: 13px;
+
+    font-weight: 750;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+
+.glass-button:hover {
+
+    transform:
+        translateY(-1px);
+
+    background:
+        rgba(99,102,241,0.28);
+}
+
+
+/* Packages Card */
+
+.packages-card {
+    overflow: hidden;
+}
+
+
+.packages-card-header {
+
+    padding: 20px 22px;
+
+    border-bottom:
+        1px solid
+        var(--border);
+}
+
+
+.packages-card-header h4 {
+
+    margin: 0 0 4px;
+
+    font-weight: 800;
+}
+
+
+.packages-card-header p {
+
+    margin: 0;
+
+    color: var(--text-secondary);
+
+    font-size: 12px;
+}
+
+
+/* Package Row */
+
+.package-row {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 18px 22px;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,0.07);
+
+    transition: 0.2s ease;
+}
+
+
+.package-row:last-child {
+    border-bottom: none;
+}
+
+
+.package-row:hover {
+
+    background:
+        rgba(255,255,255,0.04);
+}
+
+
+/* Icon */
+
+.package-icon {
+
+    flex: 0 0 48px;
+
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 14px;
+
+    background:
+        rgba(99,102,241,0.13);
+
+    color:
+        var(--primary);
+
+    font-size: 19px;
+}
+
+
+/* Info */
+
+.package-info {
+    flex: 1;
+}
+
+
+.package-info h3 {
+
+    margin: 0 0 7px;
+
+    font-size: 16px;
+
+    font-weight: 800;
+}
+
+
+/* Status */
+
+.package-status {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    font-size: 11px;
+
+    padding: 4px 8px;
+
+    border-radius: 999px;
+}
+
+
+.package-status.active {
+
+    background:
+        rgba(34,197,94,0.12);
+
+    color:
+        #22c55e;
+}
+
+
+.package-status.inactive {
+
+    background:
+        rgba(239,68,68,0.12);
+
+    color:
+        #ef4444;
+}
+
+
+/* Price */
+
+.package-price {
+
+    min-width: 120px;
+
+    text-align: center;
+}
+
+
+.package-price strong {
+
+    font-size: 20px;
+
+    font-weight: 850;
+}
+
+
+.package-price span {
+
+    color:
+        var(--text-secondary);
+
+    font-size: 12px;
+
+    margin-right: 4px;
+}
+
+
+/* Actions */
+
+.package-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+.package-actions form {
+    margin: 0;
+}
+
+
+.package-action {
+
+    width: 37px;
+    height: 37px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px solid
+        var(--border);
+
+    background:
+        rgba(255,255,255,0.06);
+
+    color:
+        var(--text-secondary);
+
+    border-radius: 11px;
+
+    cursor: pointer;
+
+    text-decoration: none;
+
+    transition: 0.2s ease;
+}
+
+
+.package-action:hover {
+
+    transform:
+        translateY(-1px);
+
+    border-color:
+        var(--primary);
+
+    color:
+        var(--primary);
+}
+
+
+.package-action.delete:hover {
+
+    color:
+        #ef4444;
+
+    border-color:
+        #ef4444;
+}
+
+
+/* Empty */
+
+.packages-empty {
+
+    text-align: center;
+
+    padding: 60px 20px;
+}
+
+
+.packages-empty i {
+
+    font-size: 42px;
+
+    color:
+        var(--text-secondary);
+}
+
+
+.packages-empty h4 {
+
+    margin: 15px 0 7px;
+}
+
+
+.packages-empty p {
+
+    margin: 0;
+
+    color:
+        var(--text-secondary);
+}
+
+
+/* Error */
+
+.package-error {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 12px 15px;
+
+    margin-bottom: 18px;
+
+    border-radius: 13px;
+
+    background:
+        rgba(239,68,68,0.10);
+
+    border:
+        1px solid
+        rgba(239,68,68,0.25);
+
+    color:
+        #ef4444;
+}
+
+
+/* Edit */
+
+.edit-package-card {
+
+    max-width: 650px;
+}
+
+
+.edit-package-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 8px;
+}
+
+
+.cancel-button {
+
+    padding: 11px 18px;
+
+    border-radius: 13px;
+
+    border:
+        1px solid
+        var(--border);
+
+    background:
+        rgba(255,255,255,0.06);
+
+    color:
+        var(--text-secondary);
+
+    text-decoration: none;
+
+    font-weight: 700;
+
+    transition: 0.2s ease;
+}
+
+
+.cancel-button:hover {
+
+    color:
+        var(--text);
+
+    border-color:
+        var(--primary);
+}
+
+
+/* Mobile */
+
+@media (max-width: 800px) {
+
+    .package-form-grid {
+
+        grid-template-columns: 1fr;
+
+        gap: 0;
+    }
+
+
+    .package-row {
+
+        flex-wrap: wrap;
+
+    }
+
+
+    .package-info {
+
+        min-width: 150px;
+    }
+
+
+    .package-price {
+
+        margin-right: auto;
+    }
+
+}
+
+
+@media (max-width: 520px) {
+
+    .package-row {
+
+        align-items: flex-start;
+
+    }
+
+
+    .package-price {
+
+        width: 100%;
+
+        text-align: right;
+
+        padding-right: 63px;
+
+    }
+
+
+    .package-actions {
+
+        margin-right: auto;
+
+    }
+
+}
